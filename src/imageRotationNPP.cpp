@@ -40,6 +40,7 @@
 #include <string.h>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
 #include <cuda_runtime.h>
 #include <npp.h>
@@ -68,6 +69,17 @@ bool printfNPPinfo(int argc, char *argv[])
     return bVal;
 }
 
+void printUsage()
+{
+    printf("Usage: imageTransformNPP [options]\n");
+    printf("Options:\n");
+    printf("  --input <path>       Input image file path\n");
+    printf("  --output <path>      Output image file path\n");
+    printf("  --rotation <angle>   Rotation angle in degrees (default: 45.0)\n");
+    printf("  --scale <factor>     Scaling factor (default: 1.0)\n");
+    printf("  --help               Show this help message\n");
+}
+
 int main(int argc, char *argv[])
 {
     printf("%s Starting...\n\n", argv[0]);
@@ -76,6 +88,8 @@ int main(int argc, char *argv[])
     {
         std::string sFilename;
         char *filePath;
+        double rotationAngle = 45.0;  // Default rotation angle
+        double scaleFactor = 1.0;     // Default scaling factor
 
         findCudaDevice(argc, (const char **)argv);
 
@@ -83,6 +97,28 @@ int main(int argc, char *argv[])
         {
             exit(EXIT_SUCCESS);
         }
+
+        // Check for help flag
+        if (checkCmdLineFlag(argc, (const char **)argv, "help"))
+        {
+            printUsage();
+            exit(EXIT_SUCCESS);
+        }
+
+        // Parse command line arguments
+        if (checkCmdLineFlag(argc, (const char **)argv, "rotation"))
+        {
+            rotationAngle = getCmdLineArgumentFloat(argc, (const char **)argv, "rotation");
+        }
+
+        if (checkCmdLineFlag(argc, (const char **)argv, "scale"))
+        {
+            scaleFactor = getCmdLineArgumentFloat(argc, (const char **)argv, "scale");
+        }
+
+        printf("SO(2) x S Transformation Parameters:\n");
+        printf("  Rotation angle: %.2f degrees\n", rotationAngle);
+        printf("  Scale factor: %.2f\n", scaleFactor);
 
         if (checkCmdLineFlag(argc, (const char **)argv, "input"))
         {
@@ -109,14 +145,14 @@ int main(int argc, char *argv[])
 
         if (infile.good())
         {
-            std::cout << "nppiRotate opened: <" << sFilename.data()
+            std::cout << "SO(2) x S Transform opened: <" << sFilename.data()
                       << "> successfully!" << std::endl;
             file_errors = 0;
             infile.close();
         }
         else
         {
-            std::cout << "nppiRotate unable to open: <" << sFilename.data() << ">"
+            std::cout << "SO(2) x S Transform unable to open: <" << sFilename.data() << ">"
                       << std::endl;
             file_errors++;
             infile.close();
@@ -136,7 +172,7 @@ int main(int argc, char *argv[])
             sResultFilename = sResultFilename.substr(0, dot);
         }
 
-        sResultFilename += "_rotate.pgm";
+        sResultFilename += "_transformed.pgm";
 
         if (checkCmdLineFlag(argc, (const char **)argv, "output"))
         {
@@ -156,25 +192,78 @@ int main(int argc, char *argv[])
 
         // create struct with the ROI size
         NppiSize oSrcSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
-        NppiPoint oSrcOffset = {0, 0};
-        NppiSize oSizeROI = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
+        NppiRect oSrcROI = {0, 0, (int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
 
-        // Calculate the bounding box of the rotated image
-        NppiRect oBoundingBox;
-        double angle = 45.0; // Rotation angle in degrees
-        NPP_CHECK_NPP(nppiGetRotateBound(oSrcSize, angle, &oBoundingBox));
+        // Convert rotation angle to radians
+        double angleRad = rotationAngle * M_PI / 180.0;
 
-        // allocate device image for the rotated image
-        npp::ImageNPP_8u_C1 oDeviceDst(oBoundingBox.width, oBoundingBox.height);
+        // Calculate the bounding box for the combined transformation
+        // We need to consider both rotation and scaling
+        double cosAngle = cos(angleRad);
+        double sinAngle = sin(angleRad);
 
-        // Set the rotation point (center of the image)
-        NppiPoint oRotationCenter = {(int)(oSrcSize.width / 2), (int)(oSrcSize.height / 2)};
+        // Calculate the corners of the transformed image
+        double corners[4][2] = {
+            {0, 0},
+            {oSrcSize.width, 0},
+            {oSrcSize.width, oSrcSize.height},
+            {0, oSrcSize.height}
+        };
 
-        // run the rotation
-        NPP_CHECK_NPP(nppiRotate_8u_C1R(
-            oDeviceSrc.data(), oSrcSize, oDeviceSrc.pitch(), oSrcOffset,
-            oDeviceDst.data(), oDeviceDst.pitch(), oBoundingBox, angle, oRotationCenter,
-            NPPI_INTER_NN));
+        double minX = 0, maxX = 0, minY = 0, maxY = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            double x = corners[i][0] - oSrcSize.width / 2.0;
+            double y = corners[i][1] - oSrcSize.height / 2.0;
+            
+            // Apply rotation and scaling
+            double newX = scaleFactor * (x * cosAngle - y * sinAngle) + oSrcSize.width / 2.0;
+            double newY = scaleFactor * (x * sinAngle + y * cosAngle) + oSrcSize.height / 2.0;
+            
+            if (i == 0)
+            {
+                minX = maxX = newX;
+                minY = maxY = newY;
+            }
+            else
+            {
+                minX = std::min(minX, newX);
+                maxX = std::max(maxX, newX);
+                minY = std::min(minY, newY);
+                maxY = std::max(maxY, newY);
+            }
+        }
+
+        int dstWidth = (int)ceil(maxX - minX);
+        int dstHeight = (int)ceil(maxY - minY);
+
+        // allocate device image for the transformed image
+        npp::ImageNPP_8u_C1 oDeviceDst(dstWidth, dstHeight);
+        
+        // Set up the affine transformation matrix for SO(2) x S
+        // Matrix format: [a11 a12 a13; a21 a22 a23]
+        // For rotation + scaling: [s*cos(θ) -s*sin(θ) tx; s*sin(θ) s*cos(θ) ty]
+        double aCoeffs[2][3];
+        
+        // Calculate translation to center the result
+        double tx = dstWidth / 2.0 - scaleFactor * (oSrcSize.width / 2.0 * cosAngle - oSrcSize.height / 2.0 * sinAngle);
+        double ty = dstHeight / 2.0 - scaleFactor * (oSrcSize.width / 2.0 * sinAngle + oSrcSize.height / 2.0 * cosAngle);
+        
+        aCoeffs[0][0] = scaleFactor * cosAngle;   // a11
+        aCoeffs[0][1] = -scaleFactor * sinAngle;  // a12
+        aCoeffs[0][2] = tx;                       // a13
+        aCoeffs[1][0] = scaleFactor * sinAngle;   // a21
+        aCoeffs[1][1] = scaleFactor * cosAngle;   // a22
+        aCoeffs[1][2] = ty;                       // a23
+
+        NppiSize oDstSize = {dstWidth, dstHeight};
+        NppiRect oDstROI = {0, 0, dstWidth, dstHeight};
+
+        // Perform the combined SO(2) x S transformation using affine warp
+        NPP_CHECK_NPP(nppiWarpAffine_8u_C1R(
+            oDeviceSrc.data(), oSrcSize, oDeviceSrc.pitch(), oSrcROI,
+            oDeviceDst.data(), oDeviceDst.pitch(), oDstROI,
+            aCoeffs, NPPI_INTER_LINEAR));
 
         // declare a host image for the result
         npp::ImageCPU_8u_C1 oHostDst(oDeviceDst.size());
@@ -182,7 +271,9 @@ int main(int argc, char *argv[])
         oDeviceDst.copyTo(oHostDst.data(), oHostDst.pitch());
 
         saveImage(sResultFilename, oHostDst);
-        std::cout << "Saved image: " << sResultFilename << std::endl;
+        std::cout << "Saved transformed image: " << sResultFilename << std::endl;
+        std::cout << "Applied transformations: Rotation=" << rotationAngle 
+                  << "°, Scale=" << scaleFactor << std::endl;
 
         nppiFree(oDeviceSrc.data());
         nppiFree(oDeviceDst.data());

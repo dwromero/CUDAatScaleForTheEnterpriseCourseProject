@@ -1,8 +1,8 @@
-# Image Rotation using NVIDIA NPP with CUDA
+# SO(2) x S Image Transformations using NVIDIA NPP with CUDA
 
 ## Overview
 
-This project demonstrates the use of NVIDIA Performance Primitives (NPP) library with CUDA to perform image rotation. The goal is to utilize GPU acceleration to efficiently rotate a given image by a specified angle, leveraging the computational power of modern GPUs. The project is a part of the CUDA at Scale for the Enterprise course and serves as a template for understanding how to implement basic image processing operations using CUDA and NPP.
+This project demonstrates the use of NVIDIA Performance Primitives (NPP) library with CUDA to perform SO(2) x S image transformations. The goal is to utilize GPU acceleration to efficiently apply rotation and scaling transformations to images, where SO(2) represents 2D rotations (Special Orthogonal group in 2D) and S represents scaling operations. This combination allows for comprehensive geometric transformations leveraging the computational power of modern GPUs. The project is a part of the CUDA at Scale for the Enterprise course and serves as an example of advanced image processing operations using CUDA and NPP.
 
 ## Code Organization
 
@@ -32,7 +32,7 @@ An optional script used to run your executable code, either with or without comm
 
 ## Key Concepts
 
-Performance Strategies, Image Processing, NPP Library
+Performance Strategies, Image Processing, NPP Library, Geometric Transformations, SO(2) Group Theory, Scaling Transformations
 
 ## Supported SM Architectures
 
@@ -95,28 +95,55 @@ The samples makefiles can take advantage of certain options:
 
 
 ## Running the Program
-After building the project, you can run the program using the following command:
+
+### Quick Start with Make Targets
+After building the project, you can run the program using several convenient make targets:
 
 ```bash
-Copy code
+# Default: 45° rotation, 1.0 scale
 make run
+
+# Demo: 45° rotation with 1.5x scaling  
+make run-demo
+
+# Rotation only: 90° rotation, no scaling
+make run-rotate
+
+# Scaling only: 2x scaling, no rotation
+make run-scale
 ```
 
-This command will execute the compiled binary, rotating the input image (Lena.png) by 45 degrees, and save the result as Lena_rotated.png in the data/ directory.
-
-If you wish to run the binary directly with custom input/output files, you can use:
+### Direct Binary Execution
+If you wish to run the binary directly with custom input/output files and transformation parameters, you can use:
 
 ```bash
-- Copy code
-./bin/imageRotationNPP --input data/Lena.png --output data/Lena_rotated.png
+./bin/imageTransformNPP --input data/Lena.png --output data/Lena_transformed.png --rotation 45 --scale 1.5
 ```
 
-- Cleaning Up
+### Transformation Parameters
+
+- `--rotation <angle>`: Rotation angle in degrees (default: 45)
+- `--scale <factor>`: Scaling factor (default: 1.0, values > 1.0 enlarge, < 1.0 shrink)
+- `--input <path>`: Input image file path
+- `--output <path>`: Output image file path
+
+### Advanced Example Usage
+
+```bash
+# Apply 30-degree rotation with 2x scaling
+./bin/imageTransformNPP --input data/Lena.png --output data/result.png --rotation 30 --scale 2.0
+
+# Apply 90-degree rotation with 0.5x scaling (shrink)
+./bin/imageTransformNPP --input data/Lena.png --output data/result.png --rotation 90 --scale 0.5
+
+# Apply only rotation (no scaling)
+./bin/imageTransformNPP --input data/Lena.png --output data/result.png --rotation 180 --scale 1.0
+```
+
+## Cleaning Up
 To clean up the compiled binaries and other generated files, run:
 
-
 ```bash
-- Copy code
 make clean
 ```
 

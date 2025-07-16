@@ -45,7 +45,7 @@ LIB_DIR = lib
 
 # Define source files and target executable
 SRC = $(SRC_DIR)/imageRotationNPP.cpp
-TARGET = $(BIN_DIR)/imageRotationNPP
+TARGET = $(BIN_DIR)/imageTransformNPP
 
 # Define the default rule
 all: $(TARGET)
@@ -55,9 +55,21 @@ $(TARGET): $(SRC)
 	mkdir -p $(BIN_DIR)
 	$(NVCC) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
-# Rule for running the application
+# Rule for running the application with default parameters
 run: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena.png --output $(DATA_DIR)/Lena_rotated.png
+	./$(TARGET) --input $(DATA_DIR)/Lena.png --output $(DATA_DIR)/Lena_transformed.png
+
+# Rule for running with custom rotation and scaling
+run-demo: $(TARGET)
+	./$(TARGET) --input $(DATA_DIR)/Lena.png --output $(DATA_DIR)/Lena_demo.png --rotation 45 --scale 1.5
+
+# Rule for running with rotation only
+run-rotate: $(TARGET)
+	./$(TARGET) --input $(DATA_DIR)/Lena.png --output $(DATA_DIR)/Lena_rotated.png --rotation 90 --scale 1.0
+
+# Rule for running with scaling only
+run-scale: $(TARGET)
+	./$(TARGET) --input $(DATA_DIR)/Lena.png --output $(DATA_DIR)/Lena_scaled.png --rotation 0 --scale 2.0
 
 # Clean up
 clean:
@@ -70,8 +82,17 @@ install:
 # Help command
 help:
 	@echo "Available make commands:"
-	@echo "  make        - Build the project."
-	@echo "  make run    - Run the project."
-	@echo "  make clean  - Clean up the build files."
-	@echo "  make install- Install the project (if applicable)."
-	@echo "  make help   - Display this help message."
+	@echo "  make            - Build the project."
+	@echo "  make run        - Run with default parameters (45° rotation, 1.0 scale)."
+	@echo "  make run-demo   - Run demo with 45° rotation and 1.5x scaling."
+	@echo "  make run-rotate - Run with 90° rotation only."
+	@echo "  make run-scale  - Run with 2x scaling only."
+	@echo "  make clean      - Clean up the build files."
+	@echo "  make install    - Install the project (if applicable)."
+	@echo "  make help       - Display this help message."
+	@echo ""
+	@echo "SO(2) x S Transformation Parameters:"
+	@echo "  --rotation <angle>   Rotation angle in degrees"
+	@echo "  --scale <factor>     Scaling factor"
+	@echo "  --input <path>       Input image file path"
+	@echo "  --output <path>      Output image file path"
