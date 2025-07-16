@@ -183,13 +183,13 @@ int main(int argc, char *argv[])
             sResultFilename = outputFilePath;
         }
 
-        // declare a host image object for an 8-bit RGB image
-        npp::ImageCPU_8u_C3 oHostSrc;
-        // load RGB image from disk
+        // declare a host image object for an 8-bit grayscale image
+        npp::ImageCPU_8u_C1 oHostSrc;
+        // load grayscale image from disk
         npp::loadImage(sFilename, oHostSrc);
         // declare a device image and copy construct from the host image,
         // i.e. upload host to device
-        npp::ImageNPP_8u_C3 oDeviceSrc(oHostSrc);
+        npp::ImageNPP_8u_C1 oDeviceSrc(oHostSrc);
 
         // create struct with the ROI size
         NppiSize oSrcSize = {(int)oDeviceSrc.width(), (int)oDeviceSrc.height()};
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
         int dstHeight = (int)ceil(maxY - minY);
 
         // allocate device image for the transformed image
-        npp::ImageNPP_8u_C3 oDeviceDst(dstWidth, dstHeight);
+        npp::ImageNPP_8u_C1 oDeviceDst(dstWidth, dstHeight);
         
         // Set up the affine transformation matrix for SO(2) x S
         // Matrix format: [a11 a12 a13; a21 a22 a23]
@@ -261,13 +261,13 @@ int main(int argc, char *argv[])
         NppiRect oDstROI = {0, 0, dstWidth, dstHeight};
 
         // Perform the combined SO(2) x S transformation using affine warp
-        NPP_CHECK_NPP(nppiWarpAffine_8u_C3R(
+        NPP_CHECK_NPP(nppiWarpAffine_8u_C1R(
             oDeviceSrc.data(), oSrcSize, oDeviceSrc.pitch(), oSrcROI,
             oDeviceDst.data(), oDeviceDst.pitch(), oDstROI,
             aCoeffs, NPPI_INTER_LINEAR));
 
         // declare a host image for the result
-        npp::ImageCPU_8u_C3 oHostDst(oDeviceDst.size());
+        npp::ImageCPU_8u_C1 oHostDst(oDeviceDst.size());
         // and copy the device result data into it
         oDeviceDst.copyTo(oHostDst.data(), oHostDst.pitch());
 
