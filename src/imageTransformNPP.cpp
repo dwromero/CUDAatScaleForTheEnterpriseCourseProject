@@ -74,7 +74,7 @@ void printUsage()
     printf("Usage: imageTransformNPP [options]\n");
     printf("Options:\n");
     printf("  --input <path>       Input image file path\n");
-    printf("  --output <path>      Output image file path\n");
+    printf("  --output <path>      Output image file path (saved as .pgm format)\n");
     printf("  --rotation <angle>   Rotation angle in degrees (default: 45.0)\n");
     printf("  --scale <factor>     Scaling factor (default: 1.0)\n");
     printf("  --help               Show this help message\n");
@@ -188,6 +188,18 @@ int main(int argc, char *argv[])
                     }
                 }
             }
+            
+            // Validate that output filename ends with .pgm
+            if (sResultFilename.length() < 4 || sResultFilename.substr(sResultFilename.length() - 4) != ".pgm") {
+                std::cerr << "Error: Output filename must have .pgm extension. Got: " << sResultFilename << std::endl;
+                std::cerr << "Example: --output result.pgm" << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            // No output specified, add .pgm extension to default filename
+            sResultFilename += ".pgm";
         }
 
         // declare a host image object for an 8-bit grayscale image
@@ -279,7 +291,7 @@ int main(int argc, char *argv[])
         oDeviceDst.copyTo(oHostDst.data(), oHostDst.pitch());
 
         saveImage(sResultFilename, oHostDst);
-        std::cout << "Saved transformed image: " << sResultFilename << std::endl;
+        std::cout << "Saved transformed image in PGM format: " << sResultFilename << std::endl;
         std::cout << "Applied transformations: Rotation=" << rotationAngle 
                   << "°, Scale=" << scaleFactor << std::endl;
 

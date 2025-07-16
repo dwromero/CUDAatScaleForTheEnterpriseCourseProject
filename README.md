@@ -63,7 +63,7 @@ Make sure the dependencies mentioned in [Dependencies]() section above are insta
 **This project only supports grayscale (single-channel) images.** The supported image formats are:
 
 - **Input**: Grayscale PNG, PGM, or other FreeImage-supported grayscale formats
-- **Output**: Grayscale PNG format
+- **Output**: Grayscale PGM format
 - **Bit depth**: 8-bit unsigned integer (0-255)
 - **Channels**: Single channel (C1) grayscale images only
 
@@ -138,7 +138,7 @@ These commands will automatically use `data/Lena_gray.png` as input and save res
 If you wish to run the binary directly with custom input/output files and transformation parameters, you can use:
 
 ```bash
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/Lena_transformed.png --rotation 45 --scale 1.5
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/Lena_transformed.pgm --rotation 45 --scale 1.5
 ```
 
 **Important:** Ensure your input image is in grayscale format before running the program.
@@ -148,9 +148,9 @@ If you wish to run the binary directly with custom input/output files and transf
 - `--rotation <angle>`: Rotation angle in degrees (default: 45)
 - `--scale <factor>`: Scaling factor (default: 1.0, values > 1.0 enlarge, < 1.0 shrink)
 - `--input <path>`: Input grayscale image file path
-- `--output <path>`: Output grayscale image file path
+- `--output <path>`: Output grayscale image file path (saved as .pgm format)
 
-**Note:** Both input and output images must be in grayscale format. The program will fail if a color image is provided as input.
+**Note:** Input images must be in grayscale format and output images are automatically saved in PGM format. The program will fail if a color image is provided as input.
 
 ### Advanced Example Usage
 
@@ -158,13 +158,13 @@ All examples below use the provided grayscale image `data/Lena_gray.png`:
 
 ```bash
 # Apply 30-degree rotation with 2x scaling
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.png --rotation 30 --scale 2.0
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 30 --scale 2.0
 
 # Apply 90-degree rotation with 0.5x scaling (shrink)
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.png --rotation 90 --scale 0.5
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 90 --scale 0.5
 
 # Apply only rotation (no scaling)
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.png --rotation 180 --scale 1.0
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 180 --scale 1.0
 ```
 
 **Remember:** Replace `data/Lena_gray.png` with your own grayscale image file path if using different input images.
