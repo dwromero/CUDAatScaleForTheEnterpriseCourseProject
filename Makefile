@@ -59,19 +59,19 @@ $(TARGET): $(SRC)
 
 # Rule for running the application with default parameters
 run: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_transformed.png
+	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_transformed.png
 
 # Rule for running with custom rotation and scaling
 run-demo: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_demo.png --rotation 45 --scale 1.5
+	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_demo.png --rotation=45 --scale=1.5
 
 # Rule for running with rotation only
 run-rotate: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_rotated.png --rotation 90 --scale 1.0
+	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_rotated.png --rotation=90 --scale=1.0
 
 # Rule for running with scaling only
 run-scale: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_scaled.png --rotation 0 --scale 2.0
+	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_scaled.png --rotation=0 --scale=2.0
 
 # Clean up
 clean:
