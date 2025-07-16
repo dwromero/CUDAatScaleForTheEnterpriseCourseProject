@@ -204,10 +204,10 @@ int main(int argc, char *argv[])
 
         // Calculate the corners of the transformed image
         double corners[4][2] = {
-            {0, 0},
-            {oSrcSize.width, 0},
-            {oSrcSize.width, oSrcSize.height},
-            {0, oSrcSize.height}
+            {0.0, 0.0},
+            {(double)oSrcSize.width, 0.0},
+            {(double)oSrcSize.width, (double)oSrcSize.height},
+            {0.0, (double)oSrcSize.height}
         };
 
         double minX = 0, maxX = 0, minY = 0, maxY = 0;
