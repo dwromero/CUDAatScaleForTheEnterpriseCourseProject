@@ -44,7 +44,7 @@ DATA_DIR = data
 LIB_DIR = lib
 
 # Define source files and target executable
-SRC = $(SRC_DIR)/imageRotationNPP.cpp
+SRC = $(SRC_DIR)/imageTransformNPP.cpp
 TARGET = $(BIN_DIR)/imageTransformNPP
 
 # Define the default rule
