@@ -117,7 +117,7 @@ make run-scale
 If you wish to run the binary directly with custom input/output files and transformation parameters, you can use:
 
 ```bash
-./bin/imageTransformNPP --input data/Lena.png --output data/Lena_transformed.png --rotation 45 --scale 1.5
+./bin/imageTransformNPP --input data/Lena_gray.png --output data/Lena_transformed.png --rotation 45 --scale 1.5
 ```
 
 ### Transformation Parameters
@@ -131,13 +131,13 @@ If you wish to run the binary directly with custom input/output files and transf
 
 ```bash
 # Apply 30-degree rotation with 2x scaling
-./bin/imageTransformNPP --input data/Lena.png --output data/result.png --rotation 30 --scale 2.0
+./bin/imageTransformNPP --input data/Lena_gray.png --output data/result.png --rotation 30 --scale 2.0
 
 # Apply 90-degree rotation with 0.5x scaling (shrink)
-./bin/imageTransformNPP --input data/Lena.png --output data/result.png --rotation 90 --scale 0.5
+./bin/imageTransformNPP --input data/Lena_gray.png --output data/result.png --rotation 90 --scale 0.5
 
 # Apply only rotation (no scaling)
-./bin/imageTransformNPP --input data/Lena.png --output data/result.png --rotation 180 --scale 1.0
+./bin/imageTransformNPP --input data/Lena_gray.png --output data/result.png --rotation 180 --scale 1.0
 ```
 
 ## Cleaning Up

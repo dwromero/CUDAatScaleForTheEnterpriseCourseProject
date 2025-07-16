@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            filePath = sdkFindFilePath("Lena.png", argv[0]);
+            filePath = sdkFindFilePath("Lena_gray.png", argv[0]);
         }
 
         if (filePath)
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            sFilename = "data/Lena.png";
+            sFilename = "data/Lena_gray.png";
         }
 
         // if we specify the filename at the command line, then we only test
