@@ -73,6 +73,10 @@ run-rotate: $(TARGET)
 run-scale: $(TARGET)
 	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_scaled.pgm --rotation=0 --scale=2.0
 
+# Convert PGM files to PNG format
+convert-to-png:
+	cd $(OUTPUTS_DIR) && python convert_pgm_to_png.py
+
 # Clean up
 clean:
 	rm -rf $(BIN_DIR)/*
@@ -85,17 +89,20 @@ install:
 # Help command
 help:
 	@echo "Available make commands:"
-	@echo "  make            - Build the project."
-	@echo "  make run        - Run with default parameters (45° rotation, 1.0 scale)."
-	@echo "  make run-demo   - Run demo with 45° rotation and 1.5x scaling."
-	@echo "  make run-rotate - Run with 90° rotation only."
-	@echo "  make run-scale  - Run with 2x scaling only."
-	@echo "  make clean      - Clean up the build files."
-	@echo "  make install    - Install the project (if applicable)."
-	@echo "  make help       - Display this help message."
+	@echo "  make              - Build the project."
+	@echo "  make run          - Run with default parameters (45° rotation, 1.0 scale)."
+	@echo "  make run-demo     - Run demo with 45° rotation and 1.5x scaling."
+	@echo "  make run-rotate   - Run with 90° rotation only."
+	@echo "  make run-scale    - Run with 2x scaling only."
+	@echo "  make convert-to-png - Convert all PGM files in outputs/ to PNG format."
+	@echo "  make clean        - Clean up the build files."
+	@echo "  make install      - Install the project (if applicable)."
+	@echo "  make help         - Display this help message."
 	@echo ""
 	@echo "SO(2) x S Transformation Parameters:"
 	@echo "  --rotation <angle>   Rotation angle in degrees"
 	@echo "  --scale <factor>     Scaling factor"
 	@echo "  --input <path>       Input image file path"
-	@echo "  --output <path>      Output image file path"
+	@echo "  --output <path>      Output image file path (saved as .pgm format)"
+	@echo ""
+	@echo "Note: Output files are saved in PGM format. Use 'make convert-to-png' to convert to PNG."

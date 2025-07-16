@@ -38,6 +38,7 @@
 #include <ImagesNPP.h>
 
 #include <string.h>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <cmath>
@@ -78,6 +79,7 @@ void printUsage()
     printf("  --rotation <angle>   Rotation angle in degrees (default: 45.0)\n");
     printf("  --scale <factor>     Scaling factor (default: 1.0)\n");
     printf("  --help               Show this help message\n");
+    printf("\nNote: Arguments can be specified as --option=value or --option value\n");
 }
 
 int main(int argc, char *argv[])
@@ -107,11 +109,21 @@ int main(int argc, char *argv[])
 
         // Parse command line arguments
         for (int i = 1; i < argc; i++) {
-            if (strcmp(argv[i], "--rotation") == 0 && i + 1 < argc) {
+            std::string arg = argv[i];
+            
+            // Handle --rotation argument (both --rotation=value and --rotation value formats)
+            if (arg.find("--rotation=") == 0) {
+                rotationAngle = atof(arg.substr(11).c_str());
+            }
+            else if (arg == "--rotation" && i + 1 < argc) {
                 rotationAngle = atof(argv[i + 1]);
                 i++; // Skip the next argument since we consumed it
             }
-            else if (strcmp(argv[i], "--scale") == 0 && i + 1 < argc) {
+            // Handle --scale argument (both --scale=value and --scale value formats)
+            else if (arg.find("--scale=") == 0) {
+                scaleFactor = atof(arg.substr(8).c_str());
+            }
+            else if (arg == "--scale" && i + 1 < argc) {
                 scaleFactor = atof(argv[i + 1]);
                 i++; // Skip the next argument since we consumed it
             }
