@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project demonstrates the use of NVIDIA Performance Primitives (NPP) library with CUDA to perform SO(2) x S image transformations. The goal is to utilize GPU acceleration to efficiently apply rotation and scaling transformations to images, where SO(2) represents 2D rotations (Special Orthogonal group in 2D) and S represents scaling operations. This combination allows for comprehensive geometric transformations leveraging the computational power of modern GPUs. The project is a part of the CUDA at Scale for the Enterprise course and serves as an example of advanced image processing operations using CUDA and NPP.
+This project demonstrates the use of NVIDIA Performance Primitives (NPP) library with CUDA to perform SO(2) x S image transformations on **grayscale images**. The goal is to utilize GPU acceleration to efficiently apply rotation and scaling transformations to 8-bit single-channel (grayscale) images, where SO(2) represents 2D rotations (Special Orthogonal group in 2D) and S represents scaling operations. This combination allows for comprehensive geometric transformations leveraging the computational power of modern GPUs. The project is a part of the CUDA at Scale for the Enterprise course and serves as an example of advanced image processing operations using CUDA and NPP.
+
+**⚠️ Important Note: This implementation currently supports only grayscale (single-channel) images due to the NPP utility function limitations.**
 
 ## Code Organization
 
@@ -56,6 +58,23 @@ x86_64, ppc64le, armv7l
 Download and install the [CUDA Toolkit 11.4](https://developer.nvidia.com/cuda-downloads) for your corresponding platform.
 Make sure the dependencies mentioned in [Dependencies]() section above are installed.
 
+## Image Format Requirements
+
+**This project only supports grayscale (single-channel) images.** The supported image formats are:
+
+- **Input**: Grayscale PNG, PGM, or other FreeImage-supported grayscale formats
+- **Output**: Grayscale PNG format
+- **Bit depth**: 8-bit unsigned integer (0-255)
+- **Channels**: Single channel (C1) grayscale images only
+
+**Converting Color Images to Grayscale:**
+If you have color images, you need to convert them to grayscale first. You can use tools like:
+- ImageMagick: `convert input.png -colorspace Gray output_gray.png`
+- Python PIL: `Image.open('input.png').convert('L').save('output_gray.png')`
+- GIMP: Image → Mode → Grayscale
+
+The provided sample image `data/Lena_gray.png` is already in the correct grayscale format.
+
 ## Build and Run
 
 ### Windows
@@ -97,7 +116,7 @@ The samples makefiles can take advantage of certain options:
 ## Running the Program
 
 ### Quick Start with Make Targets
-After building the project, you can run the program using several convenient make targets:
+After building the project, you can run the program using several convenient make targets. All targets use the provided grayscale sample image:
 
 ```bash
 # Default: 45° rotation, 1.0 scale
@@ -113,32 +132,42 @@ make run-rotate
 make run-scale
 ```
 
+These commands will automatically use `data/Lena_gray.png` as input and save results to the `outputs/` directory.
+
 ### Direct Binary Execution
 If you wish to run the binary directly with custom input/output files and transformation parameters, you can use:
 
 ```bash
-./bin/imageTransformNPP --input data/Lena_gray.png --output data/Lena_transformed.png --rotation 45 --scale 1.5
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/Lena_transformed.png --rotation 45 --scale 1.5
 ```
+
+**Important:** Ensure your input image is in grayscale format before running the program.
 
 ### Transformation Parameters
 
 - `--rotation <angle>`: Rotation angle in degrees (default: 45)
 - `--scale <factor>`: Scaling factor (default: 1.0, values > 1.0 enlarge, < 1.0 shrink)
-- `--input <path>`: Input image file path
-- `--output <path>`: Output image file path
+- `--input <path>`: Input grayscale image file path
+- `--output <path>`: Output grayscale image file path
+
+**Note:** Both input and output images must be in grayscale format. The program will fail if a color image is provided as input.
 
 ### Advanced Example Usage
 
+All examples below use the provided grayscale image `data/Lena_gray.png`:
+
 ```bash
 # Apply 30-degree rotation with 2x scaling
-./bin/imageTransformNPP --input data/Lena_gray.png --output data/result.png --rotation 30 --scale 2.0
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.png --rotation 30 --scale 2.0
 
 # Apply 90-degree rotation with 0.5x scaling (shrink)
-./bin/imageTransformNPP --input data/Lena_gray.png --output data/result.png --rotation 90 --scale 0.5
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.png --rotation 90 --scale 0.5
 
 # Apply only rotation (no scaling)
-./bin/imageTransformNPP --input data/Lena_gray.png --output data/result.png --rotation 180 --scale 1.0
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.png --rotation 180 --scale 1.0
 ```
+
+**Remember:** Replace `data/Lena_gray.png` with your own grayscale image file path if using different input images.
 
 ## Cleaning Up
 To clean up the compiled binaries and other generated files, run:

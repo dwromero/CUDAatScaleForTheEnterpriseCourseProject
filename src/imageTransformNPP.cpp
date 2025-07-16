@@ -173,7 +173,14 @@ int main(int argc, char *argv[])
             sResultFilename = sResultFilename.substr(0, dot);
         }
 
-        sResultFilename += "_transformed.png";
+        // Extract just the filename without path
+        std::string::size_type lastSlash = sResultFilename.rfind('/');
+        if (lastSlash != std::string::npos)
+        {
+            sResultFilename = sResultFilename.substr(lastSlash + 1);
+        }
+
+        sResultFilename = "outputs/" + sResultFilename + "_transformed.png";
 
         if (checkCmdLineFlag(argc, (const char **)argv, "output"))
         {

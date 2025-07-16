@@ -41,6 +41,7 @@ LDFLAGS = -L/usr/local/cuda/lib64 -lcudart -lnppc -lnppial -lnppicc -lnppidei -l
 SRC_DIR = src
 BIN_DIR = bin
 DATA_DIR = data
+OUTPUTS_DIR = outputs
 LIB_DIR = lib
 
 # Define source files and target executable
@@ -53,27 +54,29 @@ all: $(TARGET)
 # Rule for building the target executable
 $(TARGET): $(SRC)
 	mkdir -p $(BIN_DIR)
+	mkdir -p $(OUTPUTS_DIR)
 	$(NVCC) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 # Rule for running the application with default parameters
 run: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(DATA_DIR)/Lena_transformed.png
+	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_transformed.png
 
 # Rule for running with custom rotation and scaling
 run-demo: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(DATA_DIR)/Lena_demo.png --rotation 45 --scale 1.5
+	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_demo.png --rotation 45 --scale 1.5
 
 # Rule for running with rotation only
 run-rotate: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(DATA_DIR)/Lena_rotated.png --rotation 90 --scale 1.0
+	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_rotated.png --rotation 90 --scale 1.0
 
 # Rule for running with scaling only
 run-scale: $(TARGET)
-	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(DATA_DIR)/Lena_scaled.png --rotation 0 --scale 2.0
+	./$(TARGET) --input $(DATA_DIR)/Lena_gray.png --output $(OUTPUTS_DIR)/Lena_scaled.png --rotation 0 --scale 2.0
 
 # Clean up
 clean:
 	rm -rf $(BIN_DIR)/*
+	rm -rf $(OUTPUTS_DIR)/*
 
 # Installation rule (not much to install, but here for completeness)
 install:
