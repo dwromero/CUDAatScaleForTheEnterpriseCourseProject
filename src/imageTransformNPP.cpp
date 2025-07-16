@@ -176,9 +176,18 @@ int main(int argc, char *argv[])
         if (checkCmdLineFlag(argc, (const char **)argv, "output"))
         {
             char *outputFilePath;
-            getCmdLineArgumentString(argc, (const char **)argv, "output",
-                                     &outputFilePath);
-            sResultFilename = outputFilePath;
+            // First try the standard getCmdLineArgumentString for --output=filename format
+            if (getCmdLineArgumentString(argc, (const char **)argv, "output", &outputFilePath)) {
+                sResultFilename = outputFilePath;
+            } else {
+                // Handle --output filename format (separate arguments)
+                for (int i = 1; i < argc - 1; i++) {
+                    if (strcmp(argv[i], "--output") == 0) {
+                        sResultFilename = argv[i + 1];
+                        break;
+                    }
+                }
+            }
         }
 
         // declare a host image object for an 8-bit grayscale image
