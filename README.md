@@ -1,8 +1,8 @@
-# SO(2) x S Image Transformations using NVIDIA NPP with CUDA
+# SE(2) x S Image Transformations using NVIDIA NPP with CUDA
 
 ## Overview
 
-This project demonstrates the use of NVIDIA Performance Primitives (NPP) library with CUDA to perform SO(2) x S image transformations on **grayscale images**. The goal is to utilize GPU acceleration to efficiently apply rotation and scaling transformations to 8-bit single-channel (grayscale) images, where SO(2) represents 2D rotations (Special Orthogonal group in 2D) and S represents scaling operations. This combination allows for comprehensive geometric transformations leveraging the computational power of modern GPUs. The project is a part of the CUDA at Scale for the Enterprise course and serves as an example of advanced image processing operations using CUDA and NPP.
+This project demonstrates the use of NVIDIA Performance Primitives (NPP) library with CUDA to perform SE(2) x S image transformations on **grayscale images**. The goal is to utilize GPU acceleration to efficiently apply rotation, scaling, and translation transformations to 8-bit single-channel (grayscale) images. SE(2) represents the Special Euclidean group in 2D (rotation and translation), and S represents scaling operations. This combination allows for comprehensive geometric transformations leveraging the computational power of modern GPUs. This project is an example of advanced image processing operations using CUDA and NPP.
 
 **⚠️ Important Note: This implementation currently supports only grayscale (single-channel) images due to the NPP utility function limitations.**
 
@@ -129,11 +129,17 @@ make run
 # Demo: 45° rotation with 1.5x scaling  
 make run-demo
 
+# SE(2) Demo: 30° rotation, 1.2x scaling, and (50, -25) translation
+make run-se2-demo
+
 # Rotation only: 90° rotation, no scaling
 make run-rotate
 
 # Scaling only: 2x scaling, no rotation
 make run-scale
+
+# Run all previous demos
+make run-all-demos
 
 # Convert all PGM files to PNG format
 make convert-to-png
@@ -173,6 +179,9 @@ All examples below use the provided grayscale image `data/Lena_gray.png`:
 
 # Apply 90-degree rotation with 0.5x scaling (shrink)
 ./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 90 --scale 0.5
+
+# Apply SE(2) transformation: 60-degree rotation, 0.8x scaling, and translation by (100, 50)
+./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result_se2.pgm --rotation 60 --scale 0.8 --tx 100 --ty 50
 
 # Apply only rotation (no scaling)
 ./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 180 --scale 1.0

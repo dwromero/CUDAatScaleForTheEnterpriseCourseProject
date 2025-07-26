@@ -65,6 +65,10 @@ run: $(TARGET)
 run-demo: $(TARGET)
 	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_demo.pgm --rotation=45 --scale=1.5
 
+# Rule for running an SE(2) x S transformation demo
+run-se2-demo: $(TARGET)
+	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_se2_demo.pgm --rotation=30 --scale=1.2 --tx=50 --ty=-25
+
 # Rule for running with rotation only
 run-rotate: $(TARGET)
 	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_rotated.pgm --rotation=90 --scale=1.0
@@ -72,6 +76,13 @@ run-rotate: $(TARGET)
 # Rule for running with scaling only
 run-scale: $(TARGET)
 	./$(TARGET) --input=$(DATA_DIR)/Lena_gray.png --output=$(OUTPUTS_DIR)/Lena_scaled.pgm --rotation=0 --scale=2.0
+
+# Run all demos
+run-all-demos: $(TARGET)
+	make run-se2-demo
+	make run-rotate
+	make run-scale
+	make run-demo
 
 # Convert PGM files to PNG format
 convert-to-png:
@@ -93,6 +104,7 @@ help:
 	@echo "  make              - Build the project."
 	@echo "  make run          - Run with default parameters (45° rotation, 1.0 scale)."
 	@echo "  make run-demo     - Run demo with 45° rotation and 1.5x scaling."
+	@echo "  make run-se2-demo - Run demo with 30° rotation, 1.2x scaling, and translation."
 	@echo "  make run-rotate   - Run with 90° rotation only."
 	@echo "  make run-scale    - Run with 2x scaling only."
 	@echo "  make convert-to-png - Convert all PGM files in outputs/ to PNG format."
@@ -103,6 +115,8 @@ help:
 	@echo "SO(2) x S Transformation Parameters:"
 	@echo "  --rotation <angle>   Rotation angle in degrees"
 	@echo "  --scale <factor>     Scaling factor"
+	@echo "  --tx <value>         X-axis translation"
+	@echo "  --ty <value>         Y-axis translation"
 	@echo "  --input <path>       Input image file path"
 	@echo "  --output <path>      Output image file path (saved as .pgm format)"
 	@echo ""

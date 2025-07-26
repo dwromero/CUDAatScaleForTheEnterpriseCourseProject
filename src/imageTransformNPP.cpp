@@ -78,6 +78,8 @@ void printUsage()
     printf("  --output <path>      Output image file path (saved as .pgm format)\n");
     printf("  --rotation <angle>   Rotation angle in degrees (default: 45.0)\n");
     printf("  --scale <factor>     Scaling factor (default: 1.0)\n");
+    printf("  --tx <value>         Translation in x-direction (default: 0.0)\n");
+    printf("  --ty <value>         Translation in y-direction (default: 0.0)\n");
     printf("  --help               Show this help message\n");
     printf("\nNote: Arguments can be specified as --option=value or --option value\n");
 }
@@ -92,6 +94,8 @@ int main(int argc, char *argv[])
         char *filePath;
         double rotationAngle = 45.0;  // Default rotation angle
         double scaleFactor = 1.0;     // Default scaling factor
+        double translationX = 0.0;    // Default translation in x
+        double translationY = 0.0;    // Default translation in y
 
         findCudaDevice(argc, (const char **)argv);
 
@@ -127,11 +131,28 @@ int main(int argc, char *argv[])
                 scaleFactor = atof(argv[i + 1]);
                 i++; // Skip the next argument since we consumed it
             }
+            // Handle --tx argument
+            else if (arg.find("--tx=") == 0) {
+                translationX = atof(arg.substr(5).c_str());
+            }
+            else if (arg == "--tx" && i + 1 < argc) {
+                translationX = atof(argv[i + 1]);
+                i++;
+            }
+            // Handle --ty argument
+            else if (arg.find("--ty=") == 0) {
+                translationY = atof(arg.substr(5).c_str());
+            }
+            else if (arg == "--ty" && i + 1 < argc) {
+                translationY = atof(argv[i + 1]);
+                i++;
+            }
         }
 
-        printf("SO(2) x S Transformation Parameters:\n");
+        printf("SE(2) x S Transformation Parameters:\n");
         printf("  Rotation angle: %.2f degrees\n", rotationAngle);
         printf("  Scale factor: %.2f\n", scaleFactor);
+        printf("  Translation: (%.2f, %.2f)\n", translationX, translationY);
 
         if (checkCmdLineFlag(argc, (const char **)argv, "input"))
         {
@@ -249,8 +270,13 @@ int main(int argc, char *argv[])
             double y = corners[i][1] - oSrcSize.height / 2.0;
             
             // Apply rotation and scaling
-            double newX = scaleFactor * (x * cosAngle - y * sinAngle) + oSrcSize.width / 2.0;
-            double newY = scaleFactor * (x * sinAngle + y * cosAngle) + oSrcSize.height / 2.0;
+            double rotScaledX = scaleFactor * (x * cosAngle - y * sinAngle);
+            double rotScaledY = scaleFactor * (x * sinAngle + y * cosAngle);
+
+            // The final transformed point is centered in the destination image frame,
+            // then translated by the user-provided values.
+            double newX = rotScaledX + oSrcSize.width / 2.0 + translationX;
+            double newY = rotScaledY + oSrcSize.height / 2.0 + translationY;
             
             if (i == 0)
             {
@@ -272,14 +298,14 @@ int main(int argc, char *argv[])
         // allocate device image for the transformed image
         npp::ImageNPP_8u_C1 oDeviceDst(dstWidth, dstHeight);
         
-        // Set up the affine transformation matrix for SO(2) x S
+        // Set up the affine transformation matrix for SE(2) x S
         // Matrix format: [a11 a12 a13; a21 a22 a23]
-        // For rotation + scaling: [s*cos(θ) -s*sin(θ) tx; s*sin(θ) s*cos(θ) ty]
+        // For rotation + scaling + translation: [s*cos(θ) -s*sin(θ) tx; s*sin(θ) s*cos(θ) ty]
         double aCoeffs[2][3];
         
-        // Calculate translation to center the result
-        double tx = dstWidth / 2.0 - scaleFactor * (oSrcSize.width / 2.0 * cosAngle - oSrcSize.height / 2.0 * sinAngle);
-        double ty = dstHeight / 2.0 - scaleFactor * (oSrcSize.width / 2.0 * sinAngle + oSrcSize.height / 2.0 * cosAngle);
+        // Calculate translation to center the result and apply user translation
+        double tx = dstWidth / 2.0 - scaleFactor * (oSrcSize.width / 2.0 * cosAngle - oSrcSize.height / 2.0 * sinAngle) + translationX;
+        double ty = dstHeight / 2.0 - scaleFactor * (oSrcSize.width / 2.0 * sinAngle + oSrcSize.height / 2.0 * cosAngle) + translationY;
         
         aCoeffs[0][0] = scaleFactor * cosAngle;   // a11
         aCoeffs[0][1] = -scaleFactor * sinAngle;  // a12
@@ -305,7 +331,8 @@ int main(int argc, char *argv[])
         saveImage(sResultFilename, oHostDst);
         std::cout << "Saved transformed image in PGM format: " << sResultFilename << std::endl;
         std::cout << "Applied transformations: Rotation=" << rotationAngle 
-                  << "°, Scale=" << scaleFactor << std::endl;
+                  << "°, Scale=" << scaleFactor << ", Translation=(" << translationX 
+                  << ", " << translationY << ")" << std::endl;
 
         nppiFree(oDeviceSrc.data());
         nppiFree(oDeviceDst.data());
