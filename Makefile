@@ -80,7 +80,8 @@ convert-to-png:
 # Clean up
 clean:
 	rm -rf $(BIN_DIR)/*
-	rm -rf $(OUTPUTS_DIR)/*
+	rm -rf $(OUTPUTS_DIR)/*.pgm
+	rm -rf $(OUTPUTS_DIR)/png_outputs/*.png
 
 # Installation rule (not much to install, but here for completeness)
 install:
