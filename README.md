@@ -175,16 +175,16 @@ All examples below use the provided grayscale image `data/Lena_gray.png`:
 
 ```bash
 # Apply 30-degree rotation with 2x scaling
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 30 --scale 2.0
+./bin/imageTransformNPP --input=data/Lena_gray.png --output=outputs/result.pgm --rotation 30 --scale 2.0
 
 # Apply 90-degree rotation with 0.5x scaling (shrink)
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 90 --scale 0.5
+./bin/imageTransformNPP --input=data/Lena_gray.png --output=outputs/result.pgm --rotation 90 --scale 0.5
 
 # Apply SE(2) transformation: 60-degree rotation, 0.8x scaling, and translation by (100, 50)
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result_se2.pgm --rotation 60 --scale 0.8 --tx 100 --ty 50
+./bin/imageTransformNPP --input=data/Lena_gray.png --output=outputs/result_se2.pgm --rotation 60 --scale 0.8 --tx 100 --ty 50
 
 # Apply only rotation (no scaling)
-./bin/imageTransformNPP --input data/Lena_gray.png --output outputs/result.pgm --rotation 180 --scale 1.0
+./bin/imageTransformNPP --input=data/Lena_gray.png --output=outputs/result.pgm --rotation 180 --scale 1.0
 ```
 
 **Remember:** Replace `data/Lena_gray.png` with your own grayscale image file path if using different input images.
